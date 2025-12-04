@@ -4,95 +4,116 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Servicio de registro de usuarios con varios problemas de calidad
- * intencionales para el laboratorio.
+ * Servicio de registro de usuarios.
  */
 public class UserRegistrationService {
 
-    // Mala práctica: campo público y mutable
-    public String lastErrorMessage = "";
+    /**
+     * Último mensaje de error generado.
+     */
+    private String lastErrorMessage = "";
 
-    // Mala práctica: lista sin genéricos
-    private List users = new ArrayList();
+    /**
+     * Lista de usuarios registrados.
+     */
+    private final List<String> users = new ArrayList<>();
 
-    // Mala práctica: número mágico
+    /**
+     * Longitud mínima permitida para contraseñas.
+     */
     private static final int MIN_PASSWORD_LENGTH = 8;
 
-    // Constructor con lógica innecesaria
+    /**
+     * Constructor del servicio.
+     */
     public UserRegistrationService() {
-        // Comentario engañoso: aquí no se valida nada aún
         System.out.println("Constructor llamado");
-        if (users == null) { // Esta condición nunca se cumple
-            users = new ArrayList();
-        }
     }
 
     /**
-     * Registra un nuevo usuario.
-     * Retorna true si se registra, false en caso contrario.
+     * Registra un usuario, validando los campos.
+     *
+     * @param username nombre del usuario
+     * @param password contraseña
+     * @param email    correo electrónico
+     * @return true si se registra, false si hay error
      */
-    public boolean registerUser(String username, String password, String email) {
-        // Posible NullPointerException: no se valida si username es null
-        if (username.trim().isEmpty()) {
-            lastErrorMessage = "El nombre de usuario está vacío.";
+    public boolean registerUser(
+            final String username,
+            final String password,
+            final String email) {
+
+        if (username == null || username.trim().isEmpty()) {
+            this.lastErrorMessage = "El nombre de usuario está vacío.";
             return false;
         }
 
-        // Código duplicado: validación de longitud escrita dos veces
         if (password == null) {
-            lastErrorMessage = "La contraseña es null.";
+            this.lastErrorMessage = "La contraseña es null.";
             return false;
         }
 
         if (password.length() < MIN_PASSWORD_LENGTH) {
-            lastErrorMessage = "La contraseña es muy corta.";
+            this.lastErrorMessage = "La contraseña es muy corta.";
             return false;
         }
 
-        if (password.length() < MIN_PASSWORD_LENGTH) { // Duplicado intencional
-            System.out.println("Advertencia: contraseña corta.");
+        if (!email.contains("@") || !email.contains(".")) {
+            this.lastErrorMessage = "El correo electrónico no parece válido.";
+            return false;
         }
 
-        // Mala lógica: condición incorrecta para validar email
-        if (!email.contains("@") && !email.contains(".")) {
-            lastErrorMessage = "El correo electrónico no parece válido.";
-            // En realidad, debería ser una condición más estricta
-        }
-
-        // Manejo de excepciones deficiente
         try {
-            // Simulación de acceso a base de datos
             saveUser(username, password, email);
         } catch (Exception e) {
-            // Mala práctica: capturar Exception general y no registrar nada
-            lastErrorMessage = "Error desconocido al guardar el usuario.";
+            this.lastErrorMessage =
+                    "Error desconocido al guardar el usuario.";
             return false;
         }
 
-        // Usuarios duplicados no se validan
         System.out.println("Usuario registrado: " + username);
         return true;
     }
 
-    private void saveUser(String username, String password, String email) throws Exception {
-        // Simula guardar el usuario en una lista
-        users.add(username); // Mala práctica: solo se guarda el nombre
-        if (username.equals("error")) {
-            // Excepción artificial para que las herramientas lo detecten
-            throw new Exception("Nombre de usuario no permitido.");
+    /**
+     * Guarda el usuario en memoria simulando base de datos.
+     *
+     * @param username nombre del usuario
+     * @param password contraseña
+     * @param email    correo
+     * @throws Exception error si el nombre no está permitido
+     */
+    private void saveUser(
+            final String username,
+            final String password,
+            final String email) throws Exception {
+
+        this.users.add(username);
+
+        if ("error".equals(username)) {
+            throw new Exception("Nombre no permitido.");
         }
     }
 
-    // Método con nombre poco claro y sin comentarios
-    public int x(String s) {
+    /**
+     * Devuelve la longitud del texto.
+     *
+     * @param s cadena
+     * @return longitud o -1 si es null
+     */
+    public int x(final String s) {
         if (s == null) {
             return -1;
         }
-        // Uso ineficiente de String
-        String result = "";
-        for (int i = 0; i < s.length(); i++) {
-            result = result + s.charAt(i);
-        }
-        return result.length();
+        return s.length();
+    }
+
+    /**
+     * Obtiene el último mensaje de error.
+     *
+     * @return mensaje de error
+     */
+    public String getLastErrorMessage() {
+        return this.lastErrorMessage;
     }
 }
